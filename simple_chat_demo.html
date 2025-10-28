@@ -5,40 +5,96 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🤖 간단한 아바타 채팅 데모</title>
     <style>
+        :root {
+            /* 라이트 모드 (기본) */
+            --bg-gradient-start: #667eea;
+            --bg-gradient-end: #764ba2;
+            --container-bg: rgba(255, 255, 255, 0.1);
+            --text-color: white;
+            --header-bg: rgba(255, 255, 255, 0.1);
+            --message-bg: rgba(0, 0, 0, 0.1);
+            --user-bubble: rgba(76, 175, 80, 0.3);
+            --bot-bubble: rgba(255, 255, 255, 0.3);
+            --input-bg: rgba(255, 255, 255, 0.1);
+            --border-color: rgba(255, 255, 255, 0.2);
+        }
+        
+        body.dark-mode {
+            /* 다크 모드 */
+            --bg-gradient-start: #1a1a2e;
+            --bg-gradient-end: #16213e;
+            --container-bg: rgba(30, 30, 30, 0.95);
+            --text-color: #e0e0e0;
+            --header-bg: rgba(40, 40, 40, 0.9);
+            --message-bg: rgba(20, 20, 20, 0.5);
+            --user-bubble: rgba(76, 175, 80, 0.6);
+            --bot-bubble: rgba(60, 60, 60, 0.8);
+            --input-bg: rgba(50, 50, 50, 0.8);
+            --border-color: rgba(100, 100, 100, 0.3);
+        }
+        
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
         
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
             min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            color: white;
+            color: var(--text-color);
         }
         
         .chat-container {
             width: 90%;
             max-width: 800px;
             height: 80vh;
-            background: rgba(255, 255, 255, 0.1);
+            background: var(--container-bg);
             backdrop-filter: blur(10px);
             border-radius: 20px;
             display: flex;
             flex-direction: column;
             overflow: hidden;
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            border: 1px solid var(--border-color);
         }
         
         .header {
             padding: 20px;
             text-align: center;
-            background: rgba(255, 255, 255, 0.1);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            background: var(--header-bg);
+            border-bottom: 1px solid var(--border-color);
+            position: relative;
+        }
+        
+        .theme-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid var(--border-color);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5em;
+            transition: all 0.3s ease;
+        }
+        
+        .theme-toggle:hover {
+            transform: scale(1.1) rotate(20deg);
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        .theme-toggle:active {
+            transform: scale(0.95) rotate(20deg);
         }
         
         .header h1 {
@@ -69,7 +125,9 @@
             flex: 1;
             display: flex;
             padding: 20px;
+            padding-bottom: 30px;
             gap: 20px;
+            overflow-y: auto;
         }
         
         .avatar-section {
@@ -91,14 +149,88 @@
             border: 3px solid rgba(255, 255, 255, 0.3);
             font-size: 4em;
             transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* 아바타 애니메이션 */
+        .avatar-display.talking {
+            animation: talking 0.5s ease-in-out infinite;
+        }
+        
+        .avatar-display.thinking {
+            animation: thinking 1.5s ease-in-out infinite;
+        }
+        
+        .avatar-display img {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        
+        @keyframes talking {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        @keyframes thinking {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(-3deg); }
+            75% { transform: rotate(3deg); }
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .avatar-display:hover {
+            animation: bounce 0.6s ease-in-out;
         }
         
         .emotion-info {
             text-align: center;
+            width: 100%;
         }
         
         .emotion-info h3 {
             margin-bottom: 10px;
+        }
+        
+        .avatar-type-selector {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 15px;
+            padding: 5px;
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 25px;
+        }
+        
+        .avatar-type-btn {
+            flex: 1;
+            padding: 8px 15px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid transparent;
+            border-radius: 20px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9em;
+            font-weight: 600;
+        }
+        
+        .avatar-type-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        .avatar-type-btn.active {
+            background: rgba(255, 255, 255, 0.4);
+            border-color: rgba(255, 255, 255, 0.8);
+            box-shadow: 0 2px 8px rgba(255, 255, 255, 0.3);
         }
         
         .emotion-buttons {
@@ -134,6 +266,7 @@
             flex: 1;
             display: flex;
             flex-direction: column;
+            min-height: 0;
         }
         
         .messages {
@@ -141,11 +274,9 @@
             overflow-y: auto;
             overflow-x: hidden;
             padding: 20px;
-            background: rgba(0, 0, 0, 0.1);
+            background: var(--message-bg);
             border-radius: 15px;
             margin-bottom: 20px;
-            max-height: calc(100vh - 400px);
-            min-height: 300px;
             scroll-behavior: smooth;
         }
         
@@ -187,13 +318,37 @@
         }
         
         .message.user .message-bubble {
-            background: rgba(76, 175, 80, 0.3);
+            background: var(--user-bubble);
             border-bottom-right-radius: 6px;
+            animation: slideInRight 0.3s ease-out;
         }
         
         .message.bot .message-bubble {
-            background: rgba(255, 255, 255, 0.3);
+            background: var(--bot-bubble);
             border-bottom-left-radius: 6px;
+            animation: slideInLeft 0.3s ease-out;
+        }
+        
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
         }
         
         .message-time {
@@ -206,22 +361,23 @@
             display: flex;
             gap: 10px;
             align-items: flex-end;
+            flex-shrink: 0;
         }
         
         .message-input {
             flex: 1;
             padding: 12px 16px;
-            border: 2px solid rgba(255, 255, 255, 0.3);
+            border: 2px solid var(--border-color);
             border-radius: 20px;
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
+            background: var(--input-bg);
+            color: var(--text-color);
             font-size: 16px;
             resize: none;
             backdrop-filter: blur(5px);
         }
         
         .message-input::placeholder {
-            color: rgba(255, 255, 255, 0.7);
+            color: rgba(200, 200, 200, 0.7);
         }
         
         .message-input:focus {
@@ -269,6 +425,8 @@
         @media (max-width: 768px) {
             .chat-area {
                 flex-direction: column;
+                padding: 15px;
+                padding-bottom: 20px;
             }
             
             .avatar-section {
@@ -280,12 +438,20 @@
                 width: 150px;
                 height: 150px;
             }
+            
+            .messages-section {
+                height: 50vh;
+                min-height: 300px;
+            }
         }
     </style>
 </head>
 <body>
     <div class="chat-container">
         <div class="header">
+            <button class="theme-toggle" onclick="toggleTheme()" title="테마 전환">
+                <span id="theme-icon">🌙</span>
+            </button>
             <h1>🤖 실시간 아바타 상담 채팅</h1>
             <div class="status">
                 <div class="status-item connected" id="api-status">📡 API 연결됨</div>
@@ -301,6 +467,16 @@
                 <div class="emotion-info">
                     <h3 id="current-emotion">중립 상담사</h3>
                     <p id="emotion-description">편안한 마음으로 이야기해주세요</p>
+                    
+                    <!-- 아바타 타입 선택 -->
+                    <div class="avatar-type-selector">
+                        <button class="avatar-type-btn active" onclick="changeAvatarType('emoji')">
+                            😊 이모지
+                        </button>
+                        <button class="avatar-type-btn" onclick="changeAvatarType('image')">
+                            🎨 이미지
+                        </button>
+                    </div>
                     
                     <div class="emotion-buttons">
                         <button class="emotion-btn active" onclick="changeEmotion('neutral', '😐')">😐 중립</button>
@@ -339,12 +515,37 @@
     <script>
         let currentEmotion = 'neutral';
         let isTyping = false;
+        let avatarType = 'emoji'; // 'emoji' 또는 'image'
+        let isDarkMode = false; // 다크모드 상태
+        
+        // 테마 전환 함수
+        function toggleTheme() {
+            isDarkMode = !isDarkMode;
+            document.body.classList.toggle('dark-mode');
+            const themeIcon = document.getElementById('theme-icon');
+            themeIcon.textContent = isDarkMode ? '☀️' : '🌙';
+            
+            // 테마 상태 저장
+            localStorage.setItem('darkMode', isDarkMode);
+            console.log(`🎨 테마 전환: ${isDarkMode ? '다크모드' : '라이트모드'}`);
+        }
+        
+        // 페이지 로드 시 저장된 테마 적용
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedTheme = localStorage.getItem('darkMode');
+            if (savedTheme === 'true') {
+                isDarkMode = true;
+                document.body.classList.add('dark-mode');
+                document.getElementById('theme-icon').textContent = '☀️';
+            }
+        });
         
         const emotions = {
             neutral: { 
                 icon: '😐', 
                 name: '중립 상담사', 
                 desc: '편안한 마음으로 이야기해주세요',
+                image: 'avatar/mark_free_ko/neutral.png',
                 responses: [
                     "네, 잘 들었습니다. 더 자세히 말씀해주시겠어요?",
                     "그렇군요. 어떤 기분이신지 궁금해요.",
@@ -355,6 +556,7 @@
                 icon: '😊', 
                 name: '기쁨 상담사', 
                 desc: '함께 기쁨을 나누어요!',
+                image: 'avatar/mark_free_ko/joy.png',
                 responses: [
                     "정말 기쁘신 것 같네요! 😊 어떤 좋은 일이 있으셨나요?",
                     "긍정적인 에너지가 느껴져요! ✨ 더 자세히 들려주세요.",
@@ -365,6 +567,7 @@
                 icon: '😢', 
                 name: '공감 상담사', 
                 desc: '슬픈 마음을 함께 나누어요',
+                image: 'avatar/mark_free_ko/sad.png',
                 responses: [
                     "힘드신 마음이 느껴집니다. 😔 제가 들어드릴게요.",
                     "괜찮습니다. 천천히 말씀해주세요. 💙",
@@ -375,6 +578,7 @@
                 icon: '😰', 
                 name: '안정 상담사', 
                 desc: '불안한 마음을 달래드려요',
+                image: 'avatar/mark_free_ko/anxious.png',
                 responses: [
                     "불안하신 마음이 느껴져요. 😰 무엇이 걱정되시나요?",
                     "걱정이 많으시군요. 🌸 하나씩 정리해볼까요?",
@@ -385,6 +589,7 @@
                 icon: '😠', 
                 name: '진정 상담사', 
                 desc: '화난 마음을 이해해요',
+                image: 'avatar/mark_free_ko/angry.png',
                 responses: [
                     "화가 나신 것 같네요. 😤 어떤 일 때문인지 말씀해주세요.",
                     "분노를 느끼고 계시는군요. 🔥 마음껏 표현해주세요.",
@@ -408,26 +613,20 @@
             avatar.textContent = '⏳';
             avatar.style.background = 'rgba(255, 255, 255, 0.3)';
             
-            // 실제 API 호출로 아바타 생성
-            generateRealAvatar(emotion)
-                .then(avatarData => {
-                    if (avatarData && avatarData.image_base64) {
-                        // Base64 이미지 표시
-                        avatar.innerHTML = `<img src="data:image/png;base64,${avatarData.image_base64}" 
-                                           style="width: 100%; height: 100%; object-fit: cover; border-radius: 12px;" 
-                                           alt="${emotion} 아바타">`;
-                    } else {
-                        // API 실패시 이모지 fallback
-                        avatar.textContent = emotionData.icon;
-                    }
-                })
-                .catch(error => {
-                    console.warn('아바타 생성 실패, 이모지 사용:', error);
-                    avatar.textContent = emotionData.icon;
-                })
-                .finally(() => {
-                    avatar.style.background = 'rgba(255, 255, 255, 0.2)';
-                });
+            // 아바타 타입에 따라 다르게 표시
+            if (avatarType === 'emoji') {
+                // 이모지 스타일
+                avatar.innerHTML = '';
+                avatar.textContent = emotionData.icon;
+                avatar.style.background = 'rgba(255, 255, 255, 0.2)';
+            } else {
+                // 이미지 스타일 - 로컬 강아지 이미지 사용
+                avatar.innerHTML = `<img src="${emotionData.image}" 
+                                   style="width: 100%; height: 100%; object-fit: cover; border-radius: 12px;" 
+                                   alt="${emotion} 아바타"
+                                   onerror="this.parentElement.textContent='${emotionData.icon}'">`;
+                avatar.style.background = 'rgba(255, 255, 255, 0.2)';
+            }
             
             document.getElementById('current-emotion').textContent = emotionData.name;
             document.getElementById('emotion-description').textContent = emotionData.desc;
@@ -439,13 +638,45 @@
                 avatar.style.transform = 'scale(1)';
             }, 300);
             
-            console.log(`감정 변경: ${emotion}`);
+            console.log(`감정 변경: ${emotion} (타입: ${avatarType})`);
+        }
+        
+        function changeAvatarType(type) {
+            avatarType = type;
+            
+            // 버튼 상태 업데이트
+            document.querySelectorAll('.avatar-type-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            console.log(`✨ 아바타 타입 변경: ${type}`);
+            
+            // 현재 감정으로 아바타 다시 생성
+            const avatar = document.getElementById('avatar');
+            const emotionData = emotions[currentEmotion];
+            
+            if (type === 'emoji') {
+                // 이모지 스타일
+                avatar.innerHTML = '';
+                avatar.textContent = emotionData.icon;
+                avatar.style.background = 'rgba(255, 255, 255, 0.2)';
+                console.log('🎭 이모지 스타일로 변경');
+            } else {
+                // 이미지 스타일 - 로컬 강아지 이미지 사용
+                avatar.innerHTML = `<img src="${emotionData.image}" 
+                                   style="width: 100%; height: 100%; object-fit: cover; border-radius: 12px;" 
+                                   alt="${currentEmotion} 아바타"
+                                   onerror="this.parentElement.textContent='${emotionData.icon}'">`;
+                avatar.style.background = 'rgba(255, 255, 255, 0.2)';
+                console.log('🐶 강아지 이미지 스타일로 변경');
+            }
         }
         
         async function generateRealAvatar(emotion, userText = '') {
             try {
-                // 새로운 심리상담 전문 API 사용
-                const response = await fetch('http://localhost:8003/generate_avatar', {
+                // ML-serving API 사용
+                const response = await fetch('http://localhost:8000/api/v1/generate-avatar', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -462,12 +693,11 @@
                 const data = await response.json();
                 console.log('✅ 심리상담 아바타 생성 성공:', data);
                 
-                // 새로운 API 응답 형식에 맞춰 처리
+                // FastAPI 응답 형식에 맞춰 처리
                 if (data.success && data.avatar_image) {
                     // 위험도에 따른 특별 메시지 표시
-                    if (data.risk_level === 'high' && data.special_concerns.length > 0) {
-                        console.warn('⚠️ 고위험 상황 감지:', data.special_concerns);
-                        // 응급 상황 알림 (실제 구현에서는 상담사 알림 등)
+                    if (data.risk_level === 'critical' && data.risk_message) {
+                        console.warn('⚠️ 긴급 상황 감지:', data.risk_message);
                         showEmergencyAlert(data);
                     }
                     
@@ -477,10 +707,10 @@
                         emotion_message: data.emotion_message,
                         risk_level: data.risk_level,
                         risk_message: data.risk_message,
-                        intensity: data.intensity,
+                        intensity: data.intensity || 0,
                         confidence: data.confidence,
-                        analysis_method: data.analysis_method,
-                        special_concerns: data.special_concerns
+                        analysis_method: data.method || 'bert',
+                        special_concerns: data.special_concerns || []
                     };
                 } else {
                     throw new Error('아바타 생성 데이터가 올바르지 않습니다.');
@@ -540,53 +770,38 @@
             avatar.style.background = 'rgba(255, 255, 255, 0.3)';
             
             try {
-                // 새로운 심리상담 API 호출
-                const avatarData = await generateRealAvatar(emotion, userText);
-                
-                if (avatarData && avatarData.avatar_image) {
-                    // 새로운 API 응답으로 아바타 표시
-                    avatar.innerHTML = `<img src="${avatarData.avatar_image}" 
-                                       style="width: 100%; height: 100%; object-fit: cover; border-radius: 12px;" 
-                                       alt="${avatarData.emotion} 아바타" 
-                                       title="${avatarData.emotion_message}">`;
+                // 아바타 타입이 이모지면 API 호출 건너뛰기
+                if (avatarType === 'emoji') {
+                    avatar.innerHTML = '';
+                    avatar.textContent = emotionData.icon;
+                    avatar.style.background = 'rgba(255, 255, 255, 0.2)';
                     
-                    // 심리상담 메시지를 봇 응답으로 표시
-                    if (avatarData.emotion_message) {
-                        setTimeout(() => {
-                            addMessage(`💙 ${avatarData.emotion_message}`, 'bot');
-                        }, 1500);
-                    }
+                    // 현재 감정 업데이트
+                    currentEmotion = emotion;
                     
-                    // 위험도가 높을 경우 추가 메시지
-                    if (avatarData.risk_level === 'high') {
-                        setTimeout(() => {
-                            addMessage(`⚠️ ${avatarData.risk_message}`, 'bot');
-                            addMessage('자살예방상담전화: 109 (24시간)', 'bot');
-                        }, 2500);
-                    } else if (avatarData.risk_level === 'medium') {
-                        setTimeout(() => {
-                            addMessage(`💛 ${avatarData.risk_message}`, 'bot');
-                        }, 2000);
-                    }
-                    
-                    // 상세 분석 정보를 콘솔에 출력
-                    console.log('🔍 심리 분석 상세 결과:', {
-                        emotion: avatarData.emotion,
-                        intensity: avatarData.intensity,
-                        confidence: avatarData.confidence,
-                        risk_level: avatarData.risk_level,
-                        detected_patterns: avatarData.detected_patterns || [],
-                        special_concerns: avatarData.special_concerns || []
+                    // 감정 버튼 상태 업데이트
+                    document.querySelectorAll('.emotion-btn').forEach(btn => {
+                        btn.classList.remove('active');
+                        if (btn.textContent.includes(emotion) || btn.onclick.toString().includes(`'${emotion}'`)) {
+                            btn.classList.add('active');
+                        }
                     });
                     
-                } else {
-                    // API 실패시 기본 이모지 표시
-                    avatar.textContent = emotionData.icon;
-                    console.warn('아바타 API 응답이 올바르지 않습니다:', avatarData);
+                    console.log(`✅ 이모지 아바타 업데이트 완료: ${emotion}`);
+                    return;
                 }
                 
+                // 이미지 타입일 경우 로컬 강아지 이미지 사용
+                avatar.innerHTML = `<img src="${emotionData.image}" 
+                                   style="width: 100%; height: 100%; object-fit: cover; border-radius: 12px;" 
+                                   alt="${emotion} 아바타"
+                                   onerror="this.parentElement.textContent='${emotionData.icon}'">`;
+                avatar.style.background = 'rgba(255, 255, 255, 0.2)';
+                
+                console.log(`� 강아지 아바타 표시: ${emotion}`);
+                
             } catch (error) {
-                console.error('❌ 심리상담 아바타 업데이트 실패:', error);
+                console.error('❌ 아바타 업데이트 실패:', error);
                 // 오류 발생시 기본 이모지 표시
                 avatar.textContent = emotionData.icon;
             } finally {
@@ -851,14 +1066,19 @@
             const emotionData = emotions[emotion];
             const responses = emotionData.responses;
             
+            // 아바타 애니메이션 추가 (생각하는 모습)
+            const avatar = document.getElementById('avatar');
+            avatar.classList.add('thinking');
+            setTimeout(() => avatar.classList.remove('thinking'), 2000);
+            
             // 감정이 변경되었다면 아바타도 변경
             if (emotion !== currentEmotion) {
-                // 아바타 변경 (실제 API 호출)
+                // 아바타 변경
                 changeEmotionWithoutButton(emotion, emotionData.icon);
                 
                 // 감정 변경 알림
                 setTimeout(() => {
-                    addMessage(`감정 상태가 ${emotionData.name}로 변경되었습니다. ${emotionData.desc}`, 'bot');
+                    addMessage(`💭 감정 상태가 ${emotionData.name}로 변경되었습니다. ${emotionData.desc}`, 'bot');
                 }, 500);
             }
             
@@ -920,50 +1140,71 @@
             console.log(`자동 감정 변경: ${emotion}`);
         }
         
-        function sendMessage() {
-            if (isTyping) return;
+        async function sendMessage() {
+            if (isTyping) {
+                console.log('⏳ 이미 처리 중입니다...');
+                return;
+            }
             
             const input = document.getElementById('messageInput');
             const message = input.value.trim();
             
             if (!message) return;
             
-            // 사용자 메시지 추가
-            addMessage(message, 'user');
-            input.value = '';
-            
-            // 입력창 높이 초기화
-            input.style.height = 'auto';
-            
-            // 🧠 사용자 메시지로 감정 분석 및 아바타 업데이트
-            const detectedEmotion = analyzeEmotion(message);
-            console.log(`💬 사용자 메시지 감정 분석: "${message}" → ${detectedEmotion}`);
-            
-            // 아바타 즉시 업데이트
-            updateAvatarWithMessage(detectedEmotion, message);
-            
-            // 봇 응답 생성
+            // 입력 비활성화
             isTyping = true;
-            const typingMessage = addMessage('상담사가 입력 중', 'bot');
-            typingMessage.querySelector('.message-bubble div').classList.add('typing');
             
-            setTimeout(() => {
-                // 타이핑 메시지 제거
-                typingMessage.remove();
+            try {
+                // 사용자 메시지 추가
+                addMessage(message, 'user');
+                input.value = '';
                 
-                // 실제 응답 추가
-                const response = generateResponse(message);
-                addMessage(response, 'bot');
+                // 입력창 높이 초기화
+                input.style.height = 'auto';
                 
+                // 🧠 사용자 메시지로 감정 분석 및 아바타 업데이트
+                const detectedEmotion = analyzeEmotion(message);
+                console.log(`💬 사용자 메시지 감정 분석: "${message}" → ${detectedEmotion}`);
+                
+                // 아바타 업데이트 (에러가 발생해도 계속 진행)
+                try {
+                    await updateAvatarWithMessage(detectedEmotion, message);
+                } catch (error) {
+                    console.warn('⚠️ 아바타 업데이트 중 에러 (계속 진행):', error);
+                }
+                
+                // 봇 응답 생성
+                const typingMessage = addMessage('상담사가 입력 중', 'bot');
+                typingMessage.querySelector('.message-bubble div').classList.add('typing');
+                
+                setTimeout(() => {
+                    try {
+                        // 타이핑 메시지 제거
+                        typingMessage.remove();
+                        
+                        // 실제 응답 추가
+                        const response = generateResponse(message);
+                        addMessage(response, 'bot');
+                        
+                        // 스크롤 강제 이동
+                        const messagesContainer = document.getElementById('messages');
+                        setTimeout(() => {
+                            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                        }, 200);
+                    } finally {
+                        // 반드시 isTyping을 false로 설정
+                        isTyping = false;
+                    }
+                }, 1000 + Math.random() * 1000); // 1-2초 랜덤 대기
+                
+            } catch (error) {
+                console.error('❌ 메시지 전송 중 오류:', error);
+                // 에러 발생해도 반드시 isTyping을 false로 설정
                 isTyping = false;
                 
-                // 스크롤 강제 이동
-                const messagesContainer = document.getElementById('messages');
-                setTimeout(() => {
-                    messagesContainer.scrollTop = messagesContainer.scrollHeight;
-                }, 200);
-                
-            }, 1000 + Math.random() * 1000); // 1-2초 랜덤 대기
+                // 사용자에게 에러 알림
+                addMessage('죄송합니다. 메시지 처리 중 오류가 발생했습니다. 다시 시도해주세요.', 'bot');
+            }
         }
         
         // Enter 키 이벤트
@@ -982,27 +1223,18 @@
         
         // API 상태 확인 및 기본 아바타 생성
         setTimeout(() => {
-            fetch('http://localhost:8002/api/health')
+            fetch('http://localhost:8000/api/v1/health')
                 .then(response => response.json())
                 .then(data => {
                     document.getElementById('api-status').textContent = '📡 API 연결됨';
                     document.getElementById('api-status').classList.add('connected');
                     console.log('✅ API 서버 연결 확인:', data);
                     
-                    // 기본 중립 아바타 생성
-                    generateRealAvatar('neutral')
-                        .then(avatarData => {
-                            if (avatarData && avatarData.image_base64) {
-                                const avatar = document.getElementById('avatar');
-                                avatar.innerHTML = `<img src="data:image/png;base64,${avatarData.image_base64}" 
-                                                   style="width: 100%; height: 100%; object-fit: cover; border-radius: 12px;" 
-                                                   alt="중립 아바타">`;
-                                console.log('✅ 기본 아바타 생성 완료');
-                            }
-                        })
-                        .catch(error => {
-                            console.warn('⚠️ 기본 아바타 생성 실패:', error);
-                        });
+                    // 기본 아바타는 이모지로 시작 (타입 변경 가능)
+                    const avatar = document.getElementById('avatar');
+                    const emotionData = emotions['neutral'];
+                    avatar.textContent = emotionData.icon;
+                    console.log('✅ 기본 이모지 아바타 설정 완료');
                 })
                 .catch(error => {
                     document.getElementById('api-status').textContent = '📡 API 오프라인';
@@ -1011,7 +1243,7 @@
         }, 1000);
         
         console.log('🚀 간단한 아바타 채팅 데모 시작');
-        console.log('💡 채팅을 시작해보세요!');
+        console.log('💡 아바타 타입을 선택하고 채팅을 시작해보세요!');
     </script>
 </body>
 </html>
