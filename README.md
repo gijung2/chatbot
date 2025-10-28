@@ -119,7 +119,7 @@ print(f"패턴: {analysis['detected_patterns']}")
 ## 💻 개발 정보
 
 - **언어**: Python 3.11+
-- **프레임워크**: Flask
+- **프레임워크**: Fast api
 - **이미지 처리**: Pillow
 - **감정 분석**: 정규표현식 기반 패턴 매칭
 - **아키텍처**: RESTful API + 실시간 웹 인터페이스
