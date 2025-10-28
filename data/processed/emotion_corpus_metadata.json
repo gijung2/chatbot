@@ -1,0 +1,52 @@
+{
+  "total_samples": 41387,
+  "num_classes": 5,
+  "class_distribution": {
+    "anxiety": 17534,
+    "sad": 10983,
+    "anger": 9039,
+    "joy": 2052,
+    "neutral": 1779
+  },
+  "label2id": {
+    "joy": 0,
+    "sad": 1,
+    "anxiety": 2,
+    "anger": 3,
+    "neutral": 4
+  },
+  "id2label": {
+    "0": "joy",
+    "1": "sad",
+    "2": "anxiety",
+    "3": "anger",
+    "4": "neutral"
+  },
+  "emotion_mapping": {
+    "E10": "anger",
+    "E18": "anger",
+    "E19": "anger",
+    "E22": "sad",
+    "E40": "sad",
+    "E49": "sad",
+    "E56": "sad",
+    "E25": "anxiety",
+    "E30": "anxiety",
+    "E31": "anxiety",
+    "E35": "anxiety",
+    "E37": "anxiety",
+    "E50": "anxiety",
+    "E64": "joy",
+    "E66": "neutral"
+  },
+  "columns": [
+    "text",
+    "emotion",
+    "label_id",
+    "emotion_code"
+  ],
+  "source_files": [
+    "감성대화말뭉치(최종데이터)_Training.json",
+    "감성대화말뭉치(최종데이터)_Validation.json"
+  ]
+}

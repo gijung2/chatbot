@@ -3,7 +3,7 @@ K-Fold Cross Validation 메인 실행 스크립트
 감정 분류 모델 K-fold 교차검증 학습
 
 사용법:
-    python main_kfold.py --data_path data/processed/train.csv --k_folds 5 --batch_size 16 --epochs 10
+    python training/main_kfold.py --data_path data/processed/emotion_corpus_full.csv --k_folds 5 --epochs 10
 """
 import argparse
 import os
@@ -17,14 +17,14 @@ import numpy as np
 from sklearn.model_selection import StratifiedKFold
 from sklearn.metrics import accuracy_score, f1_score
 
-from data_loader import EmotionDataset, create_data_loaders
+from data_loader import EmotionDataset
 from model import create_model
 from train import Trainer
 from visualize import plot_training_history
 
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    format='%(asctime)s - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger(__name__)
 
@@ -35,11 +35,11 @@ def parse_args():
     
     # 데이터
     parser.add_argument('--data_path', type=str,
-                        default='data/processed/train.csv',
-                        help='전체 데이터 경로 (train+val 통합)')
+                        default='data/processed/emotion_corpus_full.csv',
+                        help='전체 데이터 경로')
     parser.add_argument('--text_column', type=str, default='text',
                         help='텍스트 컬럼명')
-    parser.add_argument('--label_column', type=str, default='label',
+    parser.add_argument('--label_column', type=str, default='label_id',
                         help='라벨 컬럼명')
     parser.add_argument('--k_folds', type=int, default=5,
                         help='K-Fold 수 (기본: 5)')
@@ -98,18 +98,7 @@ def set_seed(seed: int):
 
 
 def create_kfold_splits(df: pd.DataFrame, k_folds: int, label_column: str, seed: int):
-    """
-    Stratified K-Fold 분할 생성
-    
-    Args:
-        df: 전체 데이터프레임
-        k_folds: Fold 수
-        label_column: 라벨 컬럼명
-        seed: 랜덤 시드
-        
-    Returns:
-        fold별 (train_idx, val_idx) 튜플 리스트
-    """
+    """Stratified K-Fold 분할 생성"""
     skf = StratifiedKFold(n_splits=k_folds, shuffle=True, random_state=seed)
     splits = []
     
@@ -118,7 +107,7 @@ def create_kfold_splits(df: pd.DataFrame, k_folds: int, label_column: str, seed:
     
     for fold_idx, (train_idx, val_idx) in enumerate(skf.split(X, y)):
         splits.append((train_idx, val_idx))
-        logger.info(f"   Fold {fold_idx+1}: Train={len(train_idx)}, Val={len(val_idx)}")
+        logger.info(f"   Fold {fold_idx+1}: Train={len(train_idx):,}, Val={len(val_idx):,}")
     
     return splits
 
@@ -132,12 +121,7 @@ def train_single_fold(
     device,
     timestamp: str
 ):
-    """
-    단일 Fold 학습
-    
-    Returns:
-        fold_results: dict with best_val_acc, best_val_f1, best_epoch
-    """
+    """단일 Fold 학습"""
     logger.info("\n" + "=" * 80)
     logger.info(f"📊 Fold {fold_idx + 1}/{args.k_folds} 학습 시작")
     logger.info("=" * 80)
@@ -260,11 +244,16 @@ def main():
     logger.info(f"   - 경로: {args.data_path}")
     
     df = pd.read_csv(args.data_path)
-    logger.info(f"✅ 데이터 로드 완료: {len(df)} samples")
+    logger.info(f"✅ 데이터 로드 완료: {len(df):,} samples")
     logger.info(f"   - 컬럼: {list(df.columns)}")
-    logger.info(f"   - 클래스 분포:")
-    for label, count in df[args.label_column].value_counts().sort_index().items():
-        logger.info(f"      {label}: {count} ({count/len(df)*100:.1f}%)")
+    
+    # 클래스 분포
+    logger.info(f"\n📊 클래스 분포:")
+    for label_id in sorted(df[args.label_column].unique()):
+        count = (df[args.label_column] == label_id).sum()
+        percentage = count / len(df) * 100
+        emotion = df[df[args.label_column] == label_id]['emotion'].iloc[0] if 'emotion' in df.columns else label_id
+        logger.info(f"   - {emotion} (id={label_id}): {count:,} ({percentage:.1f}%)")
     
     # K-Fold 분할 생성
     logger.info("\n" + "=" * 80)
@@ -340,6 +329,7 @@ def main():
     results_summary = {
         'timestamp': timestamp,
         'k_folds': args.k_folds,
+        'total_samples': len(df),
         'avg_accuracy': float(avg_acc),
         'std_accuracy': float(std_acc),
         'avg_f1': float(avg_f1),
