@@ -195,7 +195,7 @@ def train_single_fold(
     best_epoch = np.argmax(history['val_f1'])
     fold_results = {
         'fold': fold_idx + 1,
-        'best_val_acc': history['val_acc'][best_epoch],
+        'best_val_acc': history['val_accuracy'][best_epoch],
         'best_val_f1': history['val_f1'][best_epoch],
         'best_val_loss': history['val_loss'][best_epoch],
         'best_epoch': best_epoch + 1,
