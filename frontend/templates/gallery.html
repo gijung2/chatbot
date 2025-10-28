@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>아바타 갤러리</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        .emotion-section {
+            margin-bottom: 50px;
+        }
+        
+        .emotion-title {
+            font-size: 1.8em;
+            font-weight: bold;
+            margin-bottom: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        .emotion-joy { background: #fff3cd; color: #856404; }
+        .emotion-sad { background: #d1ecf1; color: #0c5460; }
+        .emotion-anxiety { background: #f8d7da; color: #721c24; }
+        .emotion-anger { background: #f5c6cb; color: #721c24; }
+        .emotion-neutral { background: #e2e3e5; color: #383d41; }
+        
+        .avatar-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+        
+        .avatar-card {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .avatar-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        .avatar-image {
+            width: 150px;
+            height: 150px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            cursor: pointer;
+        }
+        
+        .avatar-info {
+            font-size: 0.9em;
+            color: #666;
+        }
+        
+        .nav-links {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 30px;
+            border-top: 1px solid #e0e0e0;
+        }
+        
+        .nav-links a {
+            color: #667eea;
+            text-decoration: none;
+            margin: 0 15px;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+        
+        .nav-links a:hover {
+            text-decoration: underline;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 50px;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.8);
+        }
+        
+        .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            max-width: 90%;
+            max-height: 90%;
+        }
+        
+        .modal-image {
+            max-width: 100%;
+            max-height: 100%;
+            border-radius: 10px;
+        }
+        
+        .close {
+            position: absolute;
+            top: 10px;
+            right: 25px;
+            color: white;
+            font-size: 35px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
+        .close:hover {
+            opacity: 0.7;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🖼️ 아바타 갤러리</h1>
+            <p>감정별로 생성된 모든 아바타 이미지를 확인하세요</p>
+        </div>
+        
+        <div class="content">
+            <div id="loadingSection" class="loading">
+                <div class="spinner"></div>
+                <p>아바타 이미지들을 불러오는 중...</p>
+            </div>
+            
+            <div id="galleryContent" style="display: none;">
+                <!-- 갤러리 내용이 여기에 동적으로 생성됩니다 -->
+            </div>
+            
+            <div class="nav-links">
+                <a href="/">🏠 홈으로</a>
+                <a href="/test">🧪 테스트</a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 이미지 확대 모달 -->
+    <div id="imageModal" class="modal">
+        <span class="close">&times;</span>
+        <div class="modal-content">
+            <img id="modalImage" class="modal-image" src="" alt="">
+        </div>
+    </div>
+
+    <script>
+        const emotionNames = {
+            'joy': '😊 기쁨',
+            'sad': '😢 슬픔',
+            'anxiety': '😰 불안',
+            'anger': '😡 분노',
+            'neutral': '😐 중립'
+        };
+        
+        async function loadGallery() {
+            try {
+                const response = await fetch('/api/emotions');
+                const data = await response.json();
+                
+                const galleryContent = document.getElementById('galleryContent');
+                galleryContent.innerHTML = '';
+                
+                for (const emotion of data.emotions) {
+                    const section = createEmotionSection(emotion, data.styles_info[emotion]);
+                    galleryContent.appendChild(section);
+                }
+                
+                document.getElementById('loadingSection').style.display = 'none';
+                galleryContent.style.display = 'block';
+                
+            } catch (error) {
+                console.error('Error loading gallery:', error);
+                document.getElementById('loadingSection').innerHTML = 
+                    '<p>갤러리를 불러오는 중 오류가 발생했습니다.</p>';
+            }
+        }
+        
+        function createEmotionSection(emotion, styleInfo) {
+            const section = document.createElement('div');
+            section.className = 'emotion-section';
+            
+            const title = document.createElement('div');
+            title.className = `emotion-title emotion-${emotion}`;
+            title.textContent = `${emotionNames[emotion]} (${styleInfo.count}개 스타일)`;
+            
+            const grid = document.createElement('div');
+            grid.className = 'avatar-grid';
+            
+            styleInfo.files.forEach((file, index) => {
+                const card = createAvatarCard(emotion, file, index + 1);
+                grid.appendChild(card);
+            });
+            
+            section.appendChild(title);
+            section.appendChild(grid);
+            
+            return section;
+        }
+        
+        function createAvatarCard(emotion, filename, styleNumber) {
+            const card = document.createElement('div');
+            card.className = 'avatar-card';
+            
+            const image = document.createElement('img');
+            image.className = 'avatar-image';
+            image.src = `/avatars/${emotion}/${filename}`;
+            image.alt = `${emotion} style ${styleNumber}`;
+            image.onerror = function() {
+                this.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTUwIiBoZWlnaHQ9IjE1MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZGRkIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxMiIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPuydtOuvuOyngCDsl4bsnYw8L3RleHQ+PC9zdmc+';
+            };
+            image.onclick = function() {
+                showModal(this.src, this.alt);
+            };
+            
+            const info = document.createElement('div');
+            info.className = 'avatar-info';
+            info.innerHTML = `
+                <strong>스타일 ${styleNumber}</strong><br>
+                ${filename}
+            `;
+            
+            card.appendChild(image);
+            card.appendChild(info);
+            
+            return card;
+        }
+        
+        function showModal(src, alt) {
+            const modal = document.getElementById('imageModal');
+            const modalImage = document.getElementById('modalImage');
+            
+            modalImage.src = src;
+            modalImage.alt = alt;
+            modal.style.display = 'block';
+        }
+        
+        // 모달 닫기
+        document.querySelector('.close').onclick = function() {
+            document.getElementById('imageModal').style.display = 'none';
+        };
+        
+        window.onclick = function(event) {
+            const modal = document.getElementById('imageModal');
+            if (event.target === modal) {
+                modal.style.display = 'none';
+            }
+        };
+        
+        // 페이지 로드 시 갤러리 로드
+        window.addEventListener('load', loadGallery);
+    </script>
+</body>
+</html>
