@@ -1,0 +1,187 @@
+{
+	"Version": 3,
+	"Parameters": [
+		{
+			"Id": "ParamAngleX",
+			"GroupId": "",
+			"Name": "각도 X"
+		},
+		{
+			"Id": "ParamAngleY",
+			"GroupId": "",
+			"Name": "각도 Y"
+		},
+		{
+			"Id": "ParamAngleZ",
+			"GroupId": "",
+			"Name": "각도 Z"
+		},
+		{
+			"Id": "ParamEyeLOpen",
+			"GroupId": "",
+			"Name": "왼쪽 눈 개폐"
+		},
+		{
+			"Id": "ParamEyeROpen",
+			"GroupId": "",
+			"Name": "오른쪽 눈 개폐"
+		},
+		{
+			"Id": "ParamEyeBallX",
+			"GroupId": "",
+			"Name": "눈알 X"
+		},
+		{
+			"Id": "ParamEyeBallY",
+			"GroupId": "",
+			"Name": "눈알 Y"
+		},
+		{
+			"Id": "ParamBrowLY",
+			"GroupId": "",
+			"Name": "왼쪽 눈썹 위아래"
+		},
+		{
+			"Id": "ParamBrowRY",
+			"GroupId": "",
+			"Name": "오른쪽 눈썹 위아래"
+		},
+		{
+			"Id": "ParamMouthOpenY",
+			"GroupId": "",
+			"Name": "입 개폐"
+		},
+		{
+			"Id": "ParamArmL",
+			"GroupId": "",
+			"Name": "왼팔"
+		},
+		{
+			"Id": "ParamArmR",
+			"GroupId": "",
+			"Name": "오른팔"
+		},
+		{
+			"Id": "ParamLeftLeg",
+			"GroupId": "",
+			"Name": "왼쪽 다리"
+		},
+		{
+			"Id": "ParamRightLeg",
+			"GroupId": "",
+			"Name": "오른쪽 다리"
+		},
+		{
+			"Id": "ParamBodyAngleX",
+			"GroupId": "",
+			"Name": "몸의 회전 X"
+		},
+		{
+			"Id": "ParamBodyAngleY",
+			"GroupId": "",
+			"Name": "몸의 회전 Y"
+		},
+		{
+			"Id": "ParamBodyAngleZ",
+			"GroupId": "",
+			"Name": "몸의 회전 Z"
+		},
+		{
+			"Id": "ParamBreath",
+			"GroupId": "",
+			"Name": "호흡"
+		},
+		{
+			"Id": "ParamHairFront",
+			"GroupId": "",
+			"Name": "머리 흔들림 앞"
+		},
+		{
+			"Id": "ParamHairSide",
+			"GroupId": "",
+			"Name": "머리 흔들림 가로"
+		},
+		{
+			"Id": "ParamHairBack",
+			"GroupId": "",
+			"Name": "머리 흔들림 뒤"
+		}
+	],
+	"ParameterGroups": [],
+	"Parts": [
+		{
+			"Id": "PartHead",
+			"Name": "머리"
+		},
+		{
+			"Id": "PartBody",
+			"Name": "몸"
+		},
+		{
+			"Id": "PartArmL",
+			"Name": "왼팔"
+		},
+		{
+			"Id": "PartArmR",
+			"Name": "오른팔"
+		},
+		{
+			"Id": "PartHairBack",
+			"Name": "뒷머리"
+		},
+		{
+			"Id": "Part",
+			"Name": "코어"
+		},
+		{
+			"Id": "PartHairFront",
+			"Name": "앞머리"
+		},
+		{
+			"Id": "PartEyeL",
+			"Name": "왼쪽 눈"
+		},
+		{
+			"Id": "PartEyeR",
+			"Name": "오른쪽 눈"
+		},
+		{
+			"Id": "PartHairSide",
+			"Name": "옆머리"
+		},
+		{
+			"Id": "PartMouth",
+			"Name": "입"
+		},
+		{
+			"Id": "PartFace",
+			"Name": "얼굴"
+		},
+		{
+			"Id": "PartEyeBallL",
+			"Name": "왼쪽 눈알"
+		},
+		{
+			"Id": "PartEyeWhiteL",
+			"Name": "왼쪽 흰자"
+		},
+		{
+			"Id": "PartEyeBallR",
+			"Name": "오른쪽 눈알"
+		},
+		{
+			"Id": "PartEyeWhiteR",
+			"Name": "오른쪽 흰자"
+		},
+		{
+			"Id": "PartOral",
+			"Name": "입 안"
+		}
+	],
+	"CombinedParameters": [
+		[
+			"ParamEyeBallX",
+			"ParamEyeBallY"
+		]
+	]
+}

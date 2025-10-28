@@ -1,7 +1,8 @@
-# 🧠 심리상담 전문 아바타 시스템
-**Psychological Counseling Avatar System**
+# � 감정 분석 챗봇 - 마이크로서비스 아키텍처
 
-실시간 감정 분석을 통한 심리상담 전문 아바타 생성 시스템입니다.
+**Emotion Analysis Chatbot with Microservices Architecture**
+
+KLUE-BERT 기반 한국어 감정 분석 챗봇을 Next.js, NestJS, FastAPI로 구성한 프로덕션급 마이크로서비스 시스템입니다.
 
 ## 🚀 주요 기능
 
