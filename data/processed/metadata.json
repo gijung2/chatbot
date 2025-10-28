@@ -1,0 +1,29 @@
+{
+  "emotion_labels": [
+    "joy",
+    "sad",
+    "anxiety",
+    "anger",
+    "neutral"
+  ],
+  "label_to_id": {
+    "joy": 0,
+    "sad": 1,
+    "anxiety": 2,
+    "anger": 3,
+    "neutral": 4
+  },
+  "id_to_label": {
+    "0": "joy",
+    "1": "sad",
+    "2": "anxiety",
+    "3": "anger",
+    "4": "neutral"
+  },
+  "data_stats": {
+    "train_size": 5250,
+    "val_size": 1125,
+    "test_size": 1125,
+    "total_size": 7500
+  }
+}
