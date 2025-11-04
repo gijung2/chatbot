@@ -1173,29 +1173,77 @@
                     console.warn('⚠️ 아바타 업데이트 중 에러 (계속 진행):', error);
                 }
                 
-                // 봇 응답 생성
-                const typingMessage = addMessage('상담사가 입력 중', 'bot');
+                // 봇 응답 생성 - 실제 API 호출
+                const typingMessage = addMessage('상담사가 입력 중...', 'bot');
                 typingMessage.querySelector('.message-bubble div').classList.add('typing');
                 
-                setTimeout(() => {
-                    try {
-                        // 타이핑 메시지 제거
-                        typingMessage.remove();
-                        
-                        // 실제 응답 추가
-                        const response = generateResponse(message);
-                        addMessage(response, 'bot');
-                        
-                        // 스크롤 강제 이동
-                        const messagesContainer = document.getElementById('messages');
-                        setTimeout(() => {
-                            messagesContainer.scrollTop = messagesContainer.scrollHeight;
-                        }, 200);
-                    } finally {
-                        // 반드시 isTyping을 false로 설정
-                        isTyping = false;
+                try {
+                    // FastAPI 서버에 실제 요청
+                    const response = await fetch('http://localhost:8000/chat/message', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            message: message,
+                            session_id: 'demo-session-' + Date.now()
+                        })
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error(`API 응답 오류: ${response.status}`);
                     }
-                }, 1000 + Math.random() * 1000); // 1-2초 랜덤 대기
+                    
+                    const data = await response.json();
+                    console.log('✅ API 응답:', data);
+                    
+                    // 타이핑 메시지 제거
+                    typingMessage.remove();
+                    
+                    // 실제 응답 추가
+                    addMessage(data.response, 'bot');
+                    
+                    // 감정 변경 (API에서 받은 감정)
+                    if (data.emotion && data.emotion !== currentEmotion) {
+                        const emotionData = emotions[data.emotion];
+                        if (emotionData) {
+                            changeEmotionWithoutButton(data.emotion, emotionData.icon);
+                            setTimeout(() => {
+                                addMessage(`💭 감정 상태가 ${emotionData.name}로 감지되었습니다. ${emotionData.desc}`, 'bot');
+                            }, 500);
+                        }
+                    }
+                    
+                    // 제안 사항이 있다면 추가
+                    if (data.suggestions && data.suggestions.length > 0) {
+                        setTimeout(() => {
+                            addMessage(`💡 제안: ${data.suggestions[0]}`, 'bot');
+                        }, 1000);
+                    }
+                    
+                    // 스크롤 강제 이동
+                    const messagesContainer = document.getElementById('messages');
+                    setTimeout(() => {
+                        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                    }, 200);
+                    
+                } catch (error) {
+                    console.error('❌ API 호출 실패, 로컬 응답 사용:', error);
+                    
+                    // API 실패시 fallback: 로컬 응답 사용
+                    typingMessage.remove();
+                    const localResponse = generateResponse(message);
+                    addMessage(localResponse, 'bot');
+                    
+                    // 스크롤 이동
+                    const messagesContainer = document.getElementById('messages');
+                    setTimeout(() => {
+                        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                    }, 200);
+                } finally {
+                    // 반드시 isTyping을 false로 설정
+                    isTyping = false;
+                }
                 
             } catch (error) {
                 console.error('❌ 메시지 전송 중 오류:', error);

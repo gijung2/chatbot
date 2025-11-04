@@ -1,0 +1,22 @@
+# PyTorch + CUDA 12.4 기반 학습 환경
+FROM pytorch/pytorch:2.5.0-cuda12.4-cudnn9-runtime
+
+# 작업 디렉토리 설정
+WORKDIR /workspace
+
+# Python 패키지 업데이트
+RUN pip install --upgrade pip
+
+# 필수 패키지 설치
+RUN pip install transformers>=4.30.0 \
+    datasets \
+    accelerate \
+    scikit-learn \
+    pandas \
+    numpy \
+    openpyxl \
+    matplotlib \
+    seaborn
+
+# 기본 명령
+CMD ["/bin/bash"]

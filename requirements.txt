@@ -1,41 +1,91 @@
-# 심리상담 아바타 시스템 - 완전버전 요구사항
-# Psychological Avatar System - Full Version Requirements
+# 심리상담 챗봇 시스템 - 통합 요구사항# 심리상담 아바타 시스템 - 완전버전 요구사항
 
-# 웹 프레임워크
-Flask==2.3.3
-Flask-CORS==4.0.0
-gunicorn==21.2.0
+# Psychological Counseling Chatbot System - Requirements# Psychological Avatar System - Full Version Requirements
 
-# 이미지 처리
+
+
+# ====================# 웹 프레임워크
+
+# 웹 프레임워크Flask==2.3.3
+
+# ====================Flask-CORS==4.0.0
+
+fastapi==0.104.1gunicorn==21.2.0
+
+uvicorn[standard]==0.24.0
+
+python-multipart==0.0.6# 이미지 처리
+
 Pillow==10.0.1
 
-# 데이터 처리
-numpy==1.24.3
-pandas==2.0.3
+# ====================
+
+# 데이터 검증# 데이터 처리
+
+# ====================numpy==1.24.3
+
+pydantic==2.5.0pandas==2.0.3
+
+pydantic-settings==2.1.0
 
 # 유틸리티
-python-dotenv==1.0.0
-requests==2.31.0
 
-# AI/ML (KoBERT 감정 분석용)
-torch==2.1.0
-torchvision==0.16.0
-transformers==4.35.0
-tokenizers>=0.13.0
+# ====================python-dotenv==1.0.0
+
+# AI/ML (감정 분석)requests==2.31.0
+
+# ====================
+
+torch>=2.0.0# AI/ML (KoBERT 감정 분석용)
+
+transformers>=4.35.0torch==2.1.0
+
+tokenizers>=0.13.0torchvision==0.16.0
+
+sentencepiece>=0.1.99transformers==4.35.0
+
+scikit-learn>=1.3.0tokenizers>=0.13.0
+
 sentencepiece>=0.1.99
-scikit-learn>=1.3.0
+
+# ====================scikit-learn>=1.3.0
+
+# 데이터 처리tqdm>=4.64.0
+
+# ====================
+
+pandas>=2.0.0# KoBERT 관련
+
+numpy>=1.24.0kobert-tokenizer>=0.1.2
+
+mxnet>=1.9.0
+
+# ====================gluonnlp>=0.10.0
+
+# 이미지 처리
+
+# ====================# 실시간 시스템 (확장용)
+
+Pillow>=10.0.0flask-socketio==5.3.6
+
+
+
+# ====================# 보안
+
+# 유틸리티werkzeug==2.3.7
+
+# ====================
+
+python-dotenv==1.0.0# 모니터링 (프로덕션용)
+
+requests>=2.31.0sentry-sdk[flask]==1.38.0
+
 tqdm>=4.64.0
 
-# KoBERT 관련
-kobert-tokenizer>=0.1.2
-mxnet>=1.9.0
-gluonnlp>=0.10.0
-
-# 실시간 시스템 (확장용)
-flask-socketio==5.3.6
-
-# 보안
-werkzeug==2.3.7
-
-# 모니터링 (프로덕션용)
-sentry-sdk[flask]==1.38.0
+# ====================
+# 학습 전용 (training/)
+# ====================
+# 학습 시 아래 주석 해제:
+# datasets>=2.14.0  # Hugging Face datasets
+# matplotlib>=3.7.0  # 시각화
+# seaborn>=0.12.0    # 시각화

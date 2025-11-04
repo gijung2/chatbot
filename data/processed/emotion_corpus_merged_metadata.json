@@ -1,0 +1,46 @@
+{
+  "timestamp": "2025-11-02 18:25:24",
+  "total_samples": 131091,
+  "sources": [
+    "emotion_corpus",
+    "single_conversation",
+    "continuous_conversation"
+  ],
+  "emotion_distribution": {
+    "joy": {
+      "count": 9037,
+      "percentage": 6.893684539747198
+    },
+    "sad": {
+      "count": 18074,
+      "percentage": 13.787369079494397
+    },
+    "anxiety": {
+      "count": 23090,
+      "percentage": 17.61371871448078
+    },
+    "anger": {
+      "count": 23854,
+      "percentage": 18.19651997467408
+    },
+    "neutral": {
+      "count": 57036,
+      "percentage": 43.50870769160354
+    }
+  },
+  "emotion_classes": [
+    "joy",
+    "sad",
+    "anxiety",
+    "anger",
+    "neutral"
+  ],
+  "label_mapping": {
+    "joy": 0,
+    "sad": 1,
+    "anxiety": 2,
+    "anger": 3,
+    "neutral": 4
+  },
+  "duplicates_removed": 4490
+}
