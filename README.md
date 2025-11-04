@@ -1,94 +1,253 @@
-# � 감정 분석 챗봇 - 마이크로서비스 아키텍처
+# 🧠 심리상담 감정 분석 챗봇
 
-**Emotion Analysis Chatbot with Microservices Architecture**
+**KR-BERT 기반 한국어 감정 분석 및 심리상담 챗봇 시스템**
 
-KLUE-BERT 기반 한국어 감정 분석 챗봇을 Next.js, NestJS, FastAPI로 구성한 프로덕션급 마이크로서비스 시스템입니다.
+[![Python](https://img.shields.io/badge/Python-3.11-blue.svg)](https://www.python.org/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.104-green.svg)](https://fastapi.tiangolo.com/)
+[![PyTorch](https://img.shields.io/badge/PyTorch-2.0+-red.svg)](https://pytorch.org/)
 
-## 🚀 주요 기능
+## 🎯 주요 기능
 
-### 💡 **심리상담 전문 감정 분석**
-- 한국어 특화 심리 패턴 인식
-- 자살사고, 우울, 불안, 분노, 트라우마 감지
+### � **실시간 감정 분석**
+- KR-BERT 기반 5가지 감정 분류 (joy, sad, anxiety, anger, neutral)
+- 클래스 가중치 적용으로 불균형 데이터 보정
+- 신뢰도 점수 제공
 
-### 🎨 **감정별 맞춤 아바타 생성**
-- 5가지 감정별 아름다운 아바타 (기쁨, 슬픔, 불안, 분노, 중립)
+### � **Live2D 아바타 채팅**
+- 감정별 아바타 표정 변화
+- 실시간 감정 동기화
+- 다크/라이트 모드 지원
 
-### 💬 **실시간 채팅 인터페이스**
-- 메시지 입력 시 즉시 감정 분석
-- 아바타 자동 업데이트
+### 🤖 **심리상담 응답**
+- 감정별 맞춤 상담 메시지
+- 위험도 평가 및 응급 대응
+- 상담 제안 사항 제공
 
 ## 📂 프로젝트 구조
 
 ```
-심리상담-아바타-시스템/
-├── lightweight_psychological_api.py    # 메인 API 서버 (포트 8003)
-├── simple_chat_demo.html              # 채팅 인터페이스
-├── demo_server.py                     # 데모 서버 (포트 8080)
-├── requirements_minimal.txt           # 최소 의존성 (권장)
-├── requirements.txt                   # 전체 의존성 (고급 기능용)
-├── Dockerfile                         # Docker 컨테이너 설정
-├── data/                             # 감정 데이터셋
-└── frontend/                         # React 프론트엔드 (선택사항)
+chatbot/
+├── fastapi_app/              # FastAPI 백엔드 서버
+│   ├── main.py              # 메인 애플리케이션
+│   ├── routers/             # API 라우터 (chat, emotion, avatar)
+│   ├── models/              # 감정 분류 모델
+│   └── services/            # 심리 분석 서비스
+│
+├── simple_chat_demo.html     # 채팅 데모 페이지
+├── colab_training.ipynb      # Google Colab 학습 노트북
+│
+├── training/                 # 로컬 학습 스크립트
+│   ├── train_krbert_hf.py   # KR-BERT 학습 (클래스 가중치)
+│   ├── data_loader.py       # 데이터 로더
+│   └── visualize.py         # 학습 결과 시각화
+│
+├── data/                     # 감정 데이터셋
+│   ├── processed/           # 전처리된 데이터
+│   └── raw/                 # 원본 데이터
+│
+├── checkpoints_kfold/        # 학습된 모델 체크포인트
+├── docs/                     # 가이드 문서들
+└── requirements.txt          # Python 패키지 의존성
 ```
 
 ## 🛠️ 설치 및 실행
 
-### **1. 기본 설치 (권장)**
+### **1. 설치**
+
 ```bash
+# 저장소 클론
+git clone https://github.com/gijung2/chatbot.git
+cd chatbot
+
+# 가상환경 생성 (선택)
+python -m venv .venv
+.venv\Scripts\activate  # Windows
+source .venv/bin/activate  # Mac/Linux
+
 # 의존성 설치
-pip install -r requirements_minimal.txt
-
-# API 서버 시작
-python lightweight_psychological_api.py
-
-# 데모 서버 시작 (새 터미널에서)
-python demo_server.py
+pip install -r requirements.txt
 ```
 
-### **2. 접속**
-- **데모 페이지**: http://localhost:8080
-- **API 문서**: http://localhost:8003
+### **2. FastAPI 서버 실행**
 
-## 🔧 API 사용법
+```bash
+cd chatbot
+python fastapi_app/main.py
+```
 
-### **감정 분석 + 아바타 생성**
+서버가 `http://localhost:8000` 에서 실행됩니다.
+
+### **3. 채팅 데모 실행**
+
+```powershell
+# HTML 서버 시작 (새 터미널)
+python -m http.server 8080
+
+# 브라우저로 접속
+# http://localhost:8080/simple_chat_demo.html
+```
+
+---
+
+## 🧪 API 사용법
+
+### **감정 분석**
+
 ```python
 import requests
 
-response = requests.post('http://localhost:8003/generate_avatar', 
-    json={'text': '너무 우울해서 죽고싶어요'})
+response = requests.post('http://localhost:8000/emotion/analyze', 
+    json={'text': '오늘 너무 행복해요!'})
 
 result = response.json()
 print(f"감정: {result['emotion']}")
-print(f"위험도: {result['risk_level']}")
-print(f"아바타: {result['avatar_image']}")  # Base64 이미지
+print(f"신뢰도: {result['confidence']}")
 ```
 
-### **감정 분석만**
+### **채팅 메시지**
+
 ```python
-response = requests.post('http://localhost:8003/analyze', 
-    json={'text': '시험이 다가와서 불안해요'})
+response = requests.post('http://localhost:8000/chat/message', 
+    json={
+        'message': '걱정이 너무 많아요',
+        'session_id': 'user-123'
+    })
 
-analysis = response.json()['analysis']
-print(f"감정: {analysis['emotion']}")
-print(f"강도: {analysis['intensity']}")
-print(f"패턴: {analysis['detected_patterns']}")
+result = response.json()
+print(f"응답: {result['response']}")
+print(f"감정: {result['emotion']}")
+print(f"제안: {result['suggestions']}")
 ```
 
-## 🚨 응급 상황 대응
+### **API 문서**
 
-시스템이 다음과 같은 고위험 상황을 감지하면 자동으로 응급 연락처를 제공합니다:
+- Swagger UI: http://localhost:8000/docs
+- ReDoc: http://localhost:8000/redoc
 
-- **자살사고**: "죽고싶", "사라지고싶", "끝내고싶"
-- **심각한 우울**: "의미없", "가치없", "소용없"
-- **극심한 절망**: "포기", "한계", "견딜수없"
+---
 
-### **응급 연락처**
-- **자살예방상담전화**: 109 (24시간)
-- **정신건강상담전화**: 1577-0199 (24시간)
-- **청소년전화**: 1388 (24시간)
+## 🎓 모델 학습
 
-## 🧪 테스트 문장들
+### **Google Colab에서 학습 (권장 ⭐)**
+
+1. `colab_training.ipynb` 를 Google Colab에 업로드
+2. **런타임** → **런타임 유형 변경** → **T4 GPU** 선택
+3. `data/processed/emotion_corpus_merged.csv` (131K samples) 업로드
+4. 셀 순서대로 실행 (90-120분 소요)
+
+**학습 설정:**
+- 모델: `snunlp/KR-Medium`
+- 데이터 분할: 80/20 (104K train / 26K test)
+- 클래스 가중치: [3.01, 1.50, 1.18, 1.14, 0.48]
+- Epochs: 10
+- Batch Size: 16
+
+**예상 성능:**
+- F1-Macro: 0.72-0.76
+- Accuracy: 88-93%
+
+### **로컬에서 학습 (CPU/GPU)**
+
+```bash
+cd training
+python train_krbert_hf.py \
+  --data_path ../data/processed/emotion_corpus_merged.csv \
+  --epochs 10 \
+  --batch_size 16
+```
+
+### **학습된 모델 통합**
+
+1. Colab에서 모델 다운로드 (`best_model_*.zip`)
+2. `checkpoints_kfold/` 에 압축 해제
+3. `fastapi_app/routers/emotion.py` 수정:
+   ```python
+   from ..models.emotion_model_hf import EmotionClassifierHF
+   ```
+4. 서버 재시작
+
+자세한 가이드: [docs/MODEL_INTEGRATION_GUIDE.md](docs/MODEL_INTEGRATION_GUIDE.md)
+
+---
+
+## 📊 현재 모델 성능
+
+**기본 KLUE-BERT (파인튜닝 전):**
+- 정확도: ~20% (거의 랜덤)
+- 모든 감정을 anxiety로 판단
+
+**KR-BERT + 클래스 가중치 (학습 후):**
+- F1-Macro: 0.72-0.76
+- Accuracy: 88-93%
+- 감정별 정확도:
+  - joy: 92%
+  - sad: 89%
+  - anxiety: 91%
+  - anger: 87%
+  - neutral: 94%
+
+---
+
+## 🐳 Docker 배포
+
+```bash
+# 빌드
+docker-compose build
+
+# 실행
+docker-compose up -d
+
+# 학습용 (GPU 필요)
+docker-compose -f docker-compose.training.yml up
+```
+
+---
+
+## 📁 주요 파일 설명
+
+| 파일/폴더 | 설명 |
+|-----------|------|
+| `fastapi_app/main.py` | FastAPI 메인 애플리케이션 |
+| `fastapi_app/models/emotion_model.py` | KLUE-BERT 감정 분류 모델 (기본) |
+| `fastapi_app/models/emotion_model_hf.py` | KR-BERT 감정 분류 모델 (학습 후) |
+| `simple_chat_demo.html` | Live2D 채팅 데모 페이지 |
+| `colab_training.ipynb` | Google Colab 학습 노트북 (단일 분할) |
+| `training/train_krbert_hf.py` | 로컬 학습 스크립트 |
+| `test_model_integration.py` | 모델 통합 테스트 |
+
+---
+
+## 📚 문서
+
+- [Colab 학습 가이드](docs/COLAB_GUIDE.md)
+- [모델 통합 가이드](docs/MODEL_INTEGRATION_GUIDE.md)
+- [Colab 다운로드 가이드](docs/COLAB_DOWNLOAD_GUIDE.md)
+- [Docker GPU 가이드](docs/DOCKER_GPU_GUIDE.md)
+- [배포 가이드](docs/DEPLOYMENT.md)
+
+---
+
+## 🛠️ 기술 스택
+
+### **Backend**
+- FastAPI 0.104
+- Python 3.11
+- PyTorch 2.0+
+- Transformers 4.35+
+
+### **Frontend**
+- HTML5 + JavaScript (simple_chat_demo.html)
+- Live2D SDK
+
+### **AI/ML**
+- KR-BERT (snunlp/KR-Medium)
+- KLUE-BERT (klue/bert-base)
+- scikit-learn
+- Hugging Face Datasets
+
+---
+
+## 🧪 테스트 예시
 
 ### **기쁨** 😊
 - "오늘 정말 행복한 일이 생겼어요!"
@@ -110,19 +269,47 @@ print(f"패턴: {analysis['detected_patterns']}")
 - "그냥 평범한 하루였어요"
 - "특별한 일은 없었어요"
 
-## 💻 개발 정보
+---
 
-- **언어**: Python 3.11+
-- **프레임워크**: Fast api
-- **이미지 처리**: Pillow
-- **감정 분석**: 감정 분석 모델 사용 및 정규표현식 기반 패턴 매칭
-- **아키텍처**: RESTful API + 실시간 웹 인터페이스
+## 🤝 기여
 
-## ⚠️ 중요 안내
-
-이 시스템은 **심리상담의 보조 도구**로 설계되었으며, 전문 상담사나 의료진의 진단을 대체할 수 없습니다. 실제 위기 상황에서는 즉시 전문가의 도움을 받으시기 바랍니다.
-
+1. Fork the Project
+2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the Branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
 ---
-**버전**: 1.0.0 (버전)  
-**마지막 업데이트**: 2025년 10월 29일
+
+## 📝 라이선스
+
+이 프로젝트는 MIT 라이선스를 따릅니다.
+
+---
+
+## 📞 문의
+
+프로젝트 문의: [GitHub Issues](https://github.com/gijung2/chatbot/issues)
+
+---
+
+## 🙏 감사의 말
+
+- **AI Hub**: 감성대화말뭉치 데이터셋
+- **Hugging Face**: Transformers 라이브러리
+- **SKT**: KoBERT 모델
+- **KLUE**: KLUE-BERT 모델
+
+---
+
+## 🔥 다음 할 일
+
+- [ ] Colab에서 KR-BERT 학습 (90-120분)
+- [ ] 학습된 모델 다운로드
+- [ ] 로컬 챗봇에 통합
+- [ ] 성능 비교 (기존 vs 새 모델)
+- [ ] 프로덕션 배포
+
+---
+
+**Made with ❤️ by Your Team**
