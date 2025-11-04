@@ -140,9 +140,6 @@ print(f"제안: {result['suggestions']}")
 - Epochs: 10
 - Batch Size: 16
 
-**예상 성능:**
-- F1-Macro: 0.72-0.76
-- Accuracy: 88-93%
 
 ### **로컬에서 학습 (CPU/GPU)**
 
@@ -165,24 +162,6 @@ python train_krbert_hf.py \
 4. 서버 재시작
 
 자세한 가이드: [docs/MODEL_INTEGRATION_GUIDE.md](docs/MODEL_INTEGRATION_GUIDE.md)
-
----
-
-## 📊 현재 모델 성능
-
-**기본 KLUE-BERT (파인튜닝 전):**
-- 정확도: ~20% (거의 랜덤)
-- 모든 감정을 anxiety로 판단
-
-**KR-BERT + 클래스 가중치 (학습 후):**
-- F1-Macro: 0.72-0.76
-- Accuracy: 88-93%
-- 감정별 정확도:
-  - joy: 92%
-  - sad: 89%
-  - anxiety: 91%
-  - anger: 87%
-  - neutral: 94%
 
 ---
 
