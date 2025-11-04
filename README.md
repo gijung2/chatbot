@@ -9,7 +9,7 @@
 ## 🎯 주요 기능
 
 ### � **실시간 감정 분석**
-- KR-BERT 기반 5가지 감정 분류 (joy, sad, anxiety, anger, neutral)
+- 감정분석 모델 기반 5가지 감정 분류 (joy, sad, anxiety, anger, neutral)
 - 클래스 가중치 적용으로 불균형 데이터 보정
 - 신뢰도 점수 제공
 
@@ -20,8 +20,6 @@
 
 ### 🤖 **심리상담 응답**
 - 감정별 맞춤 상담 메시지
-- 위험도 평가 및 응급 대응
-- 상담 제안 사항 제공
 
 ## 📂 프로젝트 구조
 
@@ -271,38 +269,9 @@ docker-compose -f docker-compose.training.yml up
 
 ---
 
-## 🤝 기여
 
-1. Fork the Project
-2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the Branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
 
----
-
-## 📝 라이선스
-
-이 프로젝트는 MIT 라이선스를 따릅니다.
-
----
-
-## 📞 문의
-
-프로젝트 문의: [GitHub Issues](https://github.com/gijung2/chatbot/issues)
-
----
-
-## 🙏 감사의 말
-
-- **AI Hub**: 감성대화말뭉치 데이터셋
-- **Hugging Face**: Transformers 라이브러리
-- **SKT**: KoBERT 모델
-- **KLUE**: KLUE-BERT 모델
-
----
-
-## 🔥 다음 할 일
+##  다음 할 일
 
 - [ ] Colab에서 KR-BERT 학습 (90-120분)
 - [ ] 학습된 모델 다운로드
@@ -310,6 +279,4 @@ docker-compose -f docker-compose.training.yml up
 - [ ] 성능 비교 (기존 vs 새 모델)
 - [ ] 프로덕션 배포
 
----
 
-**Made with ❤️ by Your Team**
