@@ -134,7 +134,7 @@ print(f"제안: {result['suggestions']}")
 4. 셀 순서대로 실행 (90-120분 소요)
 
 **학습 설정:**
-- 모델: `snunlp/KR-Medium`
+- 모델: `ko-bert`
 - 데이터 분할: 80/20 (104K train / 26K test)
 - 클래스 가중치: [3.01, 1.50, 1.18, 1.14, 0.48]
 - Epochs: 10
