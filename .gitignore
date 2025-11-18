@@ -22,6 +22,7 @@ wheels/
 
 # Virtual Environment
 venv/
+.venv/
 env/
 ENV/
 
@@ -29,7 +30,10 @@ ENV/
 *.pt
 *.pth
 checkpoints/
-checkpoints_kfold/
+
+# Model files (except best model)
+best_emotion_model/best_emotion_model/*.safetensors
+best_emotion_model/best_emotion_model/model.safetensors
 
 # Jupyter
 .ipynb_checkpoints/

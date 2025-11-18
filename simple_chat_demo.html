@@ -1178,15 +1178,14 @@
                 typingMessage.querySelector('.message-bubble div').classList.add('typing');
                 
                 try {
-                    // FastAPI 서버에 실제 요청
-                    const response = await fetch('http://localhost:8000/chat/message', {
+                    // FastAPI 감정 분석 API 호출 (새 모델 사용)
+                    const response = await fetch('http://localhost:8000/emotion/analyze/detailed', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
                         },
                         body: JSON.stringify({
-                            message: message,
-                            session_id: 'demo-session-' + Date.now()
+                            text: message
                         })
                     });
                     
@@ -1195,29 +1194,45 @@
                     }
                     
                     const data = await response.json();
-                    console.log('✅ API 응답:', data);
+                    console.log('✅ 감정 분석 API 응답:', data);
                     
                     // 타이핑 메시지 제거
                     typingMessage.remove();
                     
-                    // 실제 응답 추가
-                    addMessage(data.response, 'bot');
+                    // 감정 분석 결과로 응답 생성
+                    const analyzedEmotion = data.emotion;
+                    const confidence = (data.confidence * 100).toFixed(1);
+                    const emotionData = emotions[analyzedEmotion];
                     
-                    // 감정 변경 (API에서 받은 감정)
-                    if (data.emotion && data.emotion !== currentEmotion) {
-                        const emotionData = emotions[data.emotion];
-                        if (emotionData) {
-                            changeEmotionWithoutButton(data.emotion, emotionData.icon);
-                            setTimeout(() => {
-                                addMessage(`💭 감정 상태가 ${emotionData.name}로 감지되었습니다. ${emotionData.desc}`, 'bot');
-                            }, 500);
+                    // 감정 분석 결과 메시지
+                    let responseText = `당신의 감정을 ${confidence}%의 확률로 "${emotionData.name.replace(' 상담사', '')}"으로 분석했습니다. `;
+                    
+                    // 위험도 평가가 있다면 추가
+                    if (data.risk_assessment) {
+                        const riskLevel = data.risk_assessment.level;
+                        if (riskLevel === 'high') {
+                            responseText += '\n\n⚠️ ' + data.risk_assessment.recommendation;
+                        } else if (riskLevel === 'medium') {
+                            responseText += '\n\n💛 ' + data.risk_assessment.recommendation;
                         }
                     }
                     
-                    // 제안 사항이 있다면 추가
-                    if (data.suggestions && data.suggestions.length > 0) {
+                    // 응답 추가
+                    addMessage(responseText, 'bot');
+                    
+                    // 감정 변경
+                    if (analyzedEmotion !== currentEmotion) {
+                        changeEmotionWithoutButton(analyzedEmotion, emotionData.icon);
                         setTimeout(() => {
-                            addMessage(`💡 제안: ${data.suggestions[0]}`, 'bot');
+                            addMessage(`${emotionData.desc}`, 'bot');
+                        }, 500);
+                    }
+                    
+                    // 상담 제안이 있다면 추가
+                    if (data.counseling_suggestions && data.counseling_suggestions.length > 0) {
+                        setTimeout(() => {
+                            const suggestion = data.counseling_suggestions[0];
+                            addMessage(`💡 상담 제안: ${suggestion}`, 'bot');
                         }, 1000);
                     }
                     
@@ -1271,12 +1286,13 @@
         
         // API 상태 확인 및 기본 아바타 생성
         setTimeout(() => {
-            fetch('http://localhost:8000/api/v1/health')
+            fetch('http://localhost:8000/health')
                 .then(response => response.json())
                 .then(data => {
                     document.getElementById('api-status').textContent = '📡 API 연결됨';
                     document.getElementById('api-status').classList.add('connected');
                     console.log('✅ API 서버 연결 확인:', data);
+                    console.log(`✅ 모델 로드 상태: ${data.model_loaded ? '정상' : '실패'}`);
                     
                     // 기본 아바타는 이모지로 시작 (타입 변경 가능)
                     const avatar = document.getElementById('avatar');

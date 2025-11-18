@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>감정 분석 테스트</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        h1 {
+            color: #667eea;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+        }
+        
+        .input-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+        }
+        
+        textarea {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            resize: vertical;
+            min-height: 120px;
+            font-family: inherit;
+        }
+        
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+        
+        button {
+            flex: 1;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-analyze {
+            background: #667eea;
+            color: white;
+        }
+        
+        .btn-analyze:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-detailed {
+            background: #764ba2;
+            color: white;
+        }
+        
+        .btn-detailed:hover {
+            background: #63408a;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(118, 75, 162, 0.4);
+        }
+        
+        .result {
+            margin-top: 30px;
+            padding: 25px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            display: none;
+        }
+        
+        .result.show {
+            display: block;
+            animation: fadeIn 0.3s;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .emotion-tag {
+            display: inline-block;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 1.2em;
+            margin: 10px 0;
+        }
+        
+        .emotion-joy { background: #ffd93d; color: #333; }
+        .emotion-sad { background: #6bcfff; color: white; }
+        .emotion-anxiety { background: #ff9a76; color: white; }
+        .emotion-anger { background: #ff6b9d; color: white; }
+        .emotion-neutral { background: #95a5a6; color: white; }
+        
+        .confidence {
+            font-size: 1.1em;
+            margin: 10px 0;
+            color: #555;
+        }
+        
+        .probabilities {
+            margin-top: 20px;
+        }
+        
+        .prob-bar {
+            margin: 10px 0;
+        }
+        
+        .prob-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+        
+        .bar {
+            height: 25px;
+            background: #e0e0e0;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        
+        .bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            transition: width 0.5s ease;
+            display: flex;
+            align-items: center;
+            padding: 0 10px;
+            color: white;
+            font-size: 0.9em;
+            font-weight: 600;
+        }
+        
+        .risk-assessment {
+            margin-top: 20px;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            border-left: 5px solid;
+        }
+        
+        .risk-low { border-color: #2ecc71; }
+        .risk-medium { border-color: #f39c12; }
+        .risk-high { border-color: #e74c3c; }
+        
+        .suggestions {
+            margin-top: 20px;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+        }
+        
+        .suggestions ul {
+            list-style-position: inside;
+            padding-left: 10px;
+        }
+        
+        .suggestions li {
+            margin: 8px 0;
+            color: #555;
+        }
+        
+        .loading {
+            text-align: center;
+            color: #667eea;
+            font-weight: 600;
+        }
+        
+        .error {
+            background: #ffe5e5;
+            color: #c0392b;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎭 감정 분석 테스트</h1>
+        
+        <div class="input-group">
+            <label for="text">분석할 텍스트를 입력하세요:</label>
+            <textarea id="text" placeholder="예: 오늘 정말 기분이 좋아! 너무 행복해!"></textarea>
+        </div>
+        
+        <div class="button-group">
+            <button class="btn-analyze" onclick="analyzeEmotion()">
+                📊 기본 분석
+            </button>
+            <button class="btn-detailed" onclick="analyzeDetailed()">
+                🔍 상세 분석 (위험도 평가)
+            </button>
+        </div>
+        
+        <div id="result" class="result"></div>
+    </div>
+    
+    <script>
+        const API_BASE = 'http://localhost:8000';
+        
+        async function analyzeEmotion() {
+            const text = document.getElementById('text').value.trim();
+            if (!text) {
+                alert('텍스트를 입력해주세요!');
+                return;
+            }
+            
+            const resultDiv = document.getElementById('result');
+            resultDiv.className = 'result show';
+            resultDiv.innerHTML = '<div class="loading">분석 중...</div>';
+            
+            try {
+                const response = await fetch(`${API_BASE}/emotion/analyze`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text })
+                });
+                
+                const data = await response.json();
+                displayBasicResult(data);
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error">❌ 오류: ${error.message}<br>서버가 실행되고 있는지 확인하세요.</div>`;
+            }
+        }
+        
+        async function analyzeDetailed() {
+            const text = document.getElementById('text').value.trim();
+            if (!text) {
+                alert('텍스트를 입력해주세요!');
+                return;
+            }
+            
+            const resultDiv = document.getElementById('result');
+            resultDiv.className = 'result show';
+            resultDiv.innerHTML = '<div class="loading">상세 분석 중...</div>';
+            
+            try {
+                const response = await fetch(`${API_BASE}/emotion/analyze/detailed`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text })
+                });
+                
+                const data = await response.json();
+                displayDetailedResult(data);
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error">❌ 오류: ${error.message}<br>서버가 실행되고 있는지 확인하세요.</div>`;
+            }
+        }
+        
+        function displayBasicResult(data) {
+            const emotionNames = {
+                'joy': '기쁨',
+                'sad': '슬픔',
+                'anxiety': '불안',
+                'anger': '분노',
+                'neutral': '중립'
+            };
+            
+            let html = `
+                <h3>분석 결과</h3>
+                <div class="emotion-tag emotion-${data.emotion}">
+                    ${emotionNames[data.emotion]}
+                </div>
+                <div class="confidence">
+                    신뢰도: ${(data.confidence * 100).toFixed(2)}%
+                </div>
+                <div class="probabilities">
+                    <h4>감정별 확률</h4>
+            `;
+            
+            const sortedProbs = Object.entries(data.probabilities)
+                .sort((a, b) => b[1] - a[1]);
+            
+            for (const [emotion, prob] of sortedProbs) {
+                const percentage = (prob * 100).toFixed(2);
+                html += `
+                    <div class="prob-bar">
+                        <div class="prob-label">
+                            <span>${emotionNames[emotion]}</span>
+                            <span>${percentage}%</span>
+                        </div>
+                        <div class="bar">
+                            <div class="bar-fill" style="width: ${percentage}%">
+                                ${percentage}%
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            html += '</div>';
+            document.getElementById('result').innerHTML = html;
+        }
+        
+        function displayDetailedResult(data) {
+            const emotionNames = {
+                'joy': '기쁨',
+                'sad': '슬픔',
+                'anxiety': '불안',
+                'anger': '분노',
+                'neutral': '중립'
+            };
+            
+            const riskLevelNames = {
+                'low': '낮음',
+                'medium': '중간',
+                'high': '높음'
+            };
+            
+            let html = `
+                <h3>상세 분석 결과</h3>
+                <div class="emotion-tag emotion-${data.emotion}">
+                    ${emotionNames[data.emotion]}
+                </div>
+                <div class="confidence">
+                    신뢰도: ${(data.confidence * 100).toFixed(2)}%
+                </div>
+            `;
+            
+            // 위험도 평가
+            const risk = data.risk_assessment;
+            html += `
+                <div class="risk-assessment risk-${risk.level}">
+                    <h4>⚠️ 위험도 평가</h4>
+                    <p><strong>수준:</strong> ${riskLevelNames[risk.level]} (${risk.score}/10)</p>
+                    <p><strong>권장사항:</strong> ${risk.recommendation}</p>
+                    ${risk.risk_factors.length > 0 ? 
+                        `<p><strong>위험 요인:</strong> ${risk.risk_factors.join(', ')}</p>` : 
+                        ''}
+                </div>
+            `;
+            
+            // 상담 제안
+            if (data.counseling_suggestions && data.counseling_suggestions.length > 0) {
+                html += `
+                    <div class="suggestions">
+                        <h4>💬 상담 제안</h4>
+                        <ul>
+                            ${data.counseling_suggestions.map(s => `<li>${s}</li>`).join('')}
+                        </ul>
+                    </div>
+                `;
+            }
+            
+            // 확률 분포
+            html += '<div class="probabilities"><h4>감정별 확률</h4>';
+            const sortedProbs = Object.entries(data.probabilities)
+                .sort((a, b) => b[1] - a[1]);
+            
+            for (const [emotion, prob] of sortedProbs) {
+                const percentage = (prob * 100).toFixed(2);
+                html += `
+                    <div class="prob-bar">
+                        <div class="prob-label">
+                            <span>${emotionNames[emotion]}</span>
+                            <span>${percentage}%</span>
+                        </div>
+                        <div class="bar">
+                            <div class="bar-fill" style="width: ${percentage}%">
+                                ${percentage}%
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            html += '</div>';
+            document.getElementById('result').innerHTML = html;
+        }
+    </script>
+</body>
+</html>

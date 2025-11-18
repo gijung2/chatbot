@@ -57,8 +57,20 @@ class EmotionClassifierHF:
         try:
             logger.info(f"📦 모델 로드 중: {model_path}")
             
-            # 토크나이저 로드
-            self.tokenizer = AutoTokenizer.from_pretrained(model_path)
+            # KoBERT 커스텀 토크나이저 처리
+            model_path_obj = Path(model_path)
+            tokenization_file = model_path_obj / "tokenization_kobert.py"
+            
+            if tokenization_file.exists():
+                # KoBERT 토크나이저인 경우 trust_remote_code=True 필요
+                logger.info("🔍 KoBERT 토크나이저 감지 - trust_remote_code 활성화")
+                self.tokenizer = AutoTokenizer.from_pretrained(
+                    model_path,
+                    trust_remote_code=True
+                )
+            else:
+                # 일반 토크나이저
+                self.tokenizer = AutoTokenizer.from_pretrained(model_path)
             
             # 모델 로드
             self.model = AutoModelForSequenceClassification.from_pretrained(model_path)
@@ -74,23 +86,36 @@ class EmotionClassifierHF:
     def _find_latest_model(self) -> str:
         """최신 학습 모델 자동 탐색"""
         project_root = Path(__file__).parent.parent.parent
+        
+        # 1순위: best_emotion_model/best_emotion_model (Colab에서 가져온 최신 모델)
+        best_emotion_model = project_root / "best_emotion_model" / "best_emotion_model"
+        required_files = ['config.json', 'model.safetensors', 'tokenizer_config.json']
+        
+        if best_emotion_model.exists() and all((best_emotion_model / f).exists() for f in required_files):
+            logger.info(f"🔍 Colab 학습 모델 발견: best_emotion_model/best_emotion_model/")
+            return str(best_emotion_model)
+        
+        # 2순위: checkpoints_kfold (직접 압축 해제)
         checkpoints_dir = project_root / "checkpoints_kfold"
+        if checkpoints_dir.exists() and all((checkpoints_dir / f).exists() for f in required_files):
+            logger.info(f"🔍 모델 파일 발견: checkpoints_kfold/ (직접 압축 해제)")
+            return str(checkpoints_dir)
         
-        if not checkpoints_dir.exists():
-            return None
+        # 3순위: fold*_best_model_* 형식의 폴더 찾기 (이전 방식)
+        if checkpoints_dir.exists():
+            model_dirs = list(checkpoints_dir.glob("fold*_best_model_*"))
+            model_dirs.extend(list(checkpoints_dir.glob("best_model_*")))
+            
+            if model_dirs:
+                # 가장 최신 폴더 선택 (타임스탬프 기준)
+                latest_model = max(model_dirs, key=lambda p: p.name)
+                logger.info(f"🔍 최신 모델 발견: {latest_model.name}")
+                return str(latest_model)
         
-        # fold*_best_model_* 형식의 폴더 찾기
-        model_dirs = list(checkpoints_dir.glob("fold*_best_model_*"))
-        
-        if not model_dirs:
-            logger.warning(f"⚠️ {checkpoints_dir}에서 학습된 모델을 찾을 수 없습니다.")
-            return None
-        
-        # 가장 최신 폴더 선택 (타임스탬프 기준)
-        latest_model = max(model_dirs, key=lambda p: p.name)
-        logger.info(f"🔍 최신 모델 발견: {latest_model.name}")
-        
-        return str(latest_model)
+        logger.warning(f"⚠️ 학습된 모델을 찾을 수 없습니다.")
+        logger.warning(f"   - best_emotion_model/best_emotion_model/ 또는")
+        logger.warning(f"   - checkpoints_kfold/ 폴더에 모델을 배치하세요.")
+        return None
     
     def predict_emotion(
         self,
