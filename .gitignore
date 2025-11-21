@@ -31,9 +31,8 @@ ENV/
 *.pth
 checkpoints/
 
-# Model files (except best model)
-best_emotion_model/best_emotion_model/*.safetensors
-best_emotion_model/best_emotion_model/model.safetensors
+# Model files (Git LFS will handle .safetensors files)
+# best_emotion_model is now tracked by Git LFS
 
 # Jupyter
 .ipynb_checkpoints/
