@@ -6,6 +6,9 @@
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.104-green.svg)](https://fastapi.tiangolo.com/)
 [![PyTorch](https://img.shields.io/badge/PyTorch-2.0+-red.svg)](https://pytorch.org/)
 
+<img width="801" height="770" alt="image" src="https://github.com/user-attachments/assets/140e8d7b-608e-45ea-b465-06202e50e100" />
+
+
 ## 🎯 주요 기능
 
 ### � **실시간 감정 분석**
