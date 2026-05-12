@@ -210,7 +210,6 @@ docker-compose -f docker-compose.training.yml up
 - FastAPI 0.104
 - Python 3.11
 - PyTorch 2.0+
-- Transformers 4.35+
 
 ### **Frontend**
 - HTML5 + JavaScript (simple_chat_demo.html)
@@ -221,7 +220,7 @@ docker-compose -f docker-compose.training.yml up
 - KLUE-BERT (klue/bert-base)
 - scikit-learn
 - Hugging Face Datasets
-
+- Transformers 4.35+
 ---
 
 ## 🧪 테스트 예시
